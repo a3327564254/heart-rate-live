@@ -20,7 +20,6 @@ export default function HostPage() {
   const wsClientRef = useRef<HeartRateWSClient | null>(null);
   const bleConnectionRef = useRef<Awaited<ReturnType<typeof connectToHeartRateDevice>> | null>(null);
 
-  // 自动重连 WebSocket
   useEffect(() => {
     const wsClient = new HeartRateWSClient("default");
     wsClientRef.current = wsClient;
@@ -33,16 +32,14 @@ export default function HostPage() {
       onError: (msg) => setError(msg),
     });
 
-    return () => {
-      wsClient.disconnect();
-    };
+    return () => wsClient.disconnect();
   }, []);
 
   const handleConnect = useCallback(async () => {
     setError(null);
 
     if (!isWebBluetoothAvailable()) {
-      setError("此浏览器不支持 Web Bluetooth，请使用 Chrome");
+      setError("浏览器不支持 Web Bluetooth，请使用 Chrome");
       return;
     }
 
@@ -64,8 +61,6 @@ export default function HostPage() {
       );
       bleConnectionRef.current = connection;
       setBleStatus("connected");
-      // 保存连接状态
-      localStorage.setItem("hr-host-connected", "true");
     } catch (err) {
       setBleStatus("disconnected");
       setError(err instanceof Error ? err.message : "连接失败");
@@ -78,54 +73,53 @@ export default function HostPage() {
     setBleStatus("disconnected");
     setBpm(0);
     setHistory([]);
-    localStorage.removeItem("hr-host-connected");
   }, []);
 
   const isConnected = bleStatus === "connected";
 
   return (
-    <main className="min-h-[100dvh] bg-[#08080a] text-white flex flex-col safe-area">
+    <main className="min-h-[100dvh] bg-zinc-950 text-zinc-100 flex flex-col safe-area">
       {/* 顶部栏 */}
-      <header className="flex items-center justify-between px-5 py-4">
-        <a href="/" className="flex items-center gap-1.5 text-zinc-500 active:text-zinc-300 transition-colors">
-          <ArrowLeft size={16} weight="bold" />
-          <span className="text-xs">返回</span>
+      <header className="flex items-center justify-between px-5 py-3.5">
+        <a href="/" className="flex items-center gap-1 text-zinc-500 active:text-zinc-300 transition-colors">
+          <ArrowLeft size={14} weight="bold" />
+          <span className="text-[11px] font-mono">BACK</span>
         </a>
         <div className="flex items-center gap-2">
-          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${
-            isConnected ? "bg-rose-500/10" : "bg-zinc-900/80"
+          <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${
+            isConnected ? "bg-rose-500/10" : "bg-zinc-900/50"
           }`}>
-            <Broadcast size={12} weight="fill" className={isConnected ? "text-rose-500" : "text-zinc-600"} />
-            <span className={`text-[11px] ${isConnected ? "text-rose-400" : "text-zinc-500"}`}>
-              {isConnected ? "广播中" : "未广播"}
+            <Broadcast size={11} weight="fill" className={isConnected ? "text-rose-500" : "text-zinc-600"} />
+            <span className={`text-[10px] font-mono ${isConnected ? "text-rose-400" : "text-zinc-600"}`}>
+              {isConnected ? "ON AIR" : "OFF"}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900/80">
-            <Users size={12} weight="light" className="text-zinc-400" />
-            <span className="text-[11px] text-zinc-400 tabular-nums">{viewerCount}</span>
+          <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-zinc-900/50">
+            <Users size={11} weight="light" className="text-zinc-600" />
+            <span className="text-[10px] text-zinc-500 font-mono tabular-nums">{viewerCount}</span>
           </div>
         </div>
       </header>
 
       {/* 主内容 */}
-      <div className="flex-1 flex flex-col items-center justify-center px-5 -mt-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-5 -mt-4">
         {/* 蓝牙状态 */}
-        <div className="mb-4 flex items-center gap-2">
-          <Bluetooth size={16} weight="bold" className={
+        <div className="mb-3 flex items-center gap-1.5">
+          <Bluetooth size={13} weight="bold" className={
             bleStatus === "connected" ? "text-blue-400" :
             bleStatus === "connecting" ? "text-amber-400" : "text-zinc-600"
           } />
-          <span className="text-[11px] text-zinc-500">
-            {bleStatus === "connected" ? "手环已连接" :
-             bleStatus === "connecting" ? "连接中..." : "手环未连接"}
+          <span className="text-[10px] text-zinc-500 font-mono">
+            {bleStatus === "connected" ? "BAND CONNECTED" :
+             bleStatus === "connecting" ? "CONNECTING..." : "BAND DISCONNECTED"}
           </span>
         </div>
 
         {/* 心率显示 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, scale: 0.9 }}
+          initial={reduce ? false : { opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
           <HeartRateDisplay bpm={bpm} isLive={isConnected} />
         </motion.div>
@@ -135,62 +129,58 @@ export default function HostPage() {
           <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 w-full max-w-xs p-3 rounded-xl bg-red-500/10 border border-red-500/20
-                       flex items-start gap-2"
+            className="mt-4 w-full max-w-xs p-2.5 rounded-lg bg-red-500/8 border border-red-500/15
+                       flex items-start gap-1.5"
           >
-            <Warning size={14} className="text-red-400 mt-0.5 shrink-0" weight="bold" />
-            <span className="text-xs text-red-400 leading-relaxed">{error}</span>
+            <Warning size={12} className="text-red-400 mt-0.5 shrink-0" weight="bold" />
+            <span className="text-[11px] text-red-400 font-mono">{error}</span>
           </motion.div>
         )}
 
         {/* 连接按钮 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 20 }}
+          initial={reduce ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="mt-8 w-full max-w-xs"
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="mt-6 w-full max-w-xs"
         >
           {!isConnected ? (
             <button
               onClick={handleConnect}
               disabled={bleStatus === "connecting"}
-              className="w-full py-4 px-6 rounded-2xl bg-blue-600 text-white font-medium text-sm
-                         active:bg-blue-700
-                         disabled:opacity-40 disabled:cursor-not-allowed
-                         transition-colors duration-150
-                         flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-blue-600 text-white font-mono text-xs font-medium
+                         active:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed
+                         transition-colors duration-100 flex items-center justify-center gap-1.5"
             >
-              <Bluetooth size={18} weight="bold" />
-              {bleStatus === "connecting" ? "连接中..." : "连接手环"}
+              <Bluetooth size={14} weight="bold" />
+              {bleStatus === "connecting" ? "CONNECTING..." : "CONNECT BAND"}
             </button>
           ) : (
             <button
               onClick={handleDisconnect}
-              className="w-full py-4 px-6 rounded-2xl bg-zinc-800 text-zinc-300 font-medium text-sm
-                         active:bg-zinc-700
-                         transition-colors duration-150
-                         flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-zinc-800 text-zinc-300 font-mono text-xs font-medium
+                         active:bg-zinc-700 transition-colors duration-100
+                         flex items-center justify-center gap-1.5"
             >
-              <BluetoothSlash size={18} weight="bold" />
-              断开连接
+              <BluetoothSlash size={14} weight="bold" />
+              DISCONNECT
             </button>
           )}
         </motion.div>
       </div>
 
-      {/* 底部提示 */}
-      <div className="px-5 pb-6">
-        <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/30">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-            <span className="text-[11px] text-zinc-400 font-medium">使用说明</span>
+      {/* 底部说明 */}
+      <div className="px-5 pb-5">
+        <div className="p-3 rounded-xl bg-zinc-900/30 border border-zinc-800/30">
+          <div className="text-[10px] text-zinc-500 font-mono mb-2">HOW TO USE</div>
+          <div className="space-y-1">
+            {["开启手环心率广播", "点击上方按钮连接", "连接成功自动广播", "分享页面给观众"].map((step, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <span className="text-[10px] text-zinc-600 font-mono tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-[11px] text-zinc-500">{step}</span>
+              </div>
+            ))}
           </div>
-          <ul className="space-y-1.5 text-[11px] text-zinc-500 leading-relaxed">
-            <li>1. 确保手环已开启心率广播</li>
-            <li>2. 点击上方按钮连接手环</li>
-            <li>3. 连接成功后自动开始广播</li>
-            <li>4. 分享页面给观众查看心率</li>
-          </ul>
         </div>
       </div>
     </main>

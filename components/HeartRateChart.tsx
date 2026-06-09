@@ -19,8 +19,7 @@ interface HeartRateChartProps {
 
 export function HeartRateChart({ data, maxPoints = 60 }: HeartRateChartProps) {
   const chartData = useMemo(() => {
-    const sliced = data.slice(-maxPoints);
-    return sliced.map((point, i) => ({
+    return data.slice(-maxPoints).map((point, i) => ({
       index: i,
       bpm: point.bpm,
       time: new Date(point.timestamp).toLocaleTimeString("zh-CN", {
@@ -42,58 +41,58 @@ export function HeartRateChart({ data, maxPoints = 60 }: HeartRateChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="w-full h-32 flex flex-col items-center justify-center gap-2">
-        <Pulse size={20} weight="light" className="text-zinc-700" />
-        <span className="text-[11px] text-zinc-600">等待数据</span>
+      <div className="w-full h-28 flex flex-col items-center justify-center gap-1.5">
+        <Pulse size={16} weight="light" className="text-zinc-700" />
+        <span className="text-[10px] text-zinc-600 font-mono">NO DATA</span>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-36">
+    <div className="w-full h-28">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+        <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
           <defs>
-            <linearGradient id="hrGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.3} />
+            <linearGradient id="hrGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.25} />
               <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="time"
-            tick={{ fill: "#3f3f46", fontSize: 9 }}
+            tick={{ fill: "#3f3f46", fontSize: 8, fontFamily: "monospace" }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             domain={[minBpm, maxBpm]}
-            tick={{ fill: "#3f3f46", fontSize: 9 }}
+            tick={{ fill: "#3f3f46", fontSize: 8, fontFamily: "monospace" }}
             axisLine={false}
             tickLine={false}
-            width={30}
+            width={28}
           />
           <Tooltip
             contentStyle={{
               background: "#18181b",
               border: "1px solid #27272a",
-              borderRadius: "12px",
-              color: "#fff",
-              fontSize: "11px",
-              padding: "6px 10px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+              borderRadius: "8px",
+              color: "#fafafa",
+              fontSize: "10px",
+              fontFamily: "monospace",
+              padding: "4px 8px",
             }}
-            labelStyle={{ color: "#71717a", fontSize: "10px" }}
+            labelStyle={{ color: "#52525b", fontSize: "9px" }}
             formatter={(value) => [`${value} BPM`]}
           />
           <Area
             type="monotone"
             dataKey="bpm"
             stroke="#f43f5e"
-            strokeWidth={2}
-            fill="url(#hrGradient)"
+            strokeWidth={1.5}
+            fill="url(#hrGrad)"
             dot={false}
-            activeDot={{ r: 3, fill: "#f43f5e", strokeWidth: 0 }}
+            activeDot={{ r: 2.5, fill: "#f43f5e", strokeWidth: 0 }}
           />
         </AreaChart>
       </ResponsiveContainer>

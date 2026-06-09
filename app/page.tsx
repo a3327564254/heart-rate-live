@@ -46,90 +46,87 @@ export default function ViewerPage() {
       onViewerCount: setViewerCount,
     });
 
-    return () => {
-      wsClient.disconnect();
-    };
+    return () => wsClient.disconnect();
   }, []);
 
   const isLive = wsStatus === "connected" && hostConnected;
 
   return (
-    <main className="min-h-[100dvh] bg-[#08080a] text-white flex flex-col safe-area">
-      {/* 顶部栏 */}
-      <header className="flex items-center justify-between px-5 py-4">
-        <div className="flex items-center gap-2">
+    <main className="min-h-[100dvh] bg-zinc-950 text-zinc-100 flex flex-col safe-area">
+      {/* 顶部状态栏 - 单行 */}
+      <header className="flex items-center justify-between px-5 py-3.5">
+        <div className="flex items-center gap-1.5">
           {wsStatus === "connected" ? (
-            <WifiHigh size={14} weight="fill" className="text-emerald-500" />
+            <WifiHigh size={13} weight="fill" className="text-emerald-500" />
           ) : (
-            <WifiSlash size={14} weight="fill" className="text-zinc-600" />
+            <WifiSlash size={13} weight="fill" className="text-zinc-600" />
           )}
-          <span className="text-[11px] text-zinc-500">
-            {wsStatus === "connected" ? (isLive ? "直播中" : "已连接") : "连接中..."}
+          <span className="text-[11px] text-zinc-500 font-mono">
+            {isLive ? "LIVE" : wsStatus === "connected" ? "CONNECTED" : "CONNECTING"}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900/80">
-          <Users size={12} weight="light" className="text-zinc-400" />
-          <span className="text-[11px] text-zinc-400 tabular-nums">{viewerCount}</span>
+        <div className="flex items-center gap-1">
+          <Users size={12} weight="light" className="text-zinc-600" />
+          <span className="text-[11px] text-zinc-500 font-mono tabular-nums">{viewerCount}</span>
         </div>
       </header>
 
-      {/* 主内容 */}
-      <div className="flex-1 flex flex-col items-center justify-center px-5 -mt-8">
-        {/* 心率显示 */}
+      {/* 主内容区 - 垂直居中 */}
+      <div className="flex-1 flex flex-col items-center justify-center px-5 -mt-4">
         <motion.div
-          initial={reduce ? false : { opacity: 0, scale: 0.9 }}
+          initial={reduce ? false : { opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
           <HeartRateDisplay bpm={bpm} isLive={isLive} />
         </motion.div>
 
-        {/* 等待提示 */}
+        {/* 等待状态 - 简洁提示 */}
         {!hostConnected && wsStatus === "connected" && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6 flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20"
+            transition={{ delay: 0.2 }}
+            className="mt-5 flex items-center gap-1.5"
           >
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             >
-              <Pulse size={14} weight="bold" className="text-amber-500" />
+              <Pulse size={12} weight="bold" className="text-amber-500" />
             </motion.div>
-            <span className="text-xs text-amber-500">等待主播连接手环</span>
+            <span className="text-[11px] text-amber-500/70 font-mono">WAITING FOR HOST</span>
           </motion.div>
         )}
       </div>
 
-      {/* 底部信息区 */}
-      <div className="px-5 pb-6 space-y-4">
-        {/* 统计卡片 */}
+      {/* 底部数据区 */}
+      <div className="px-5 pb-5 space-y-3">
+        {/* 统计卡片 - 3列网格 */}
         {bpmRange && (
           <motion.div
-            initial={reduce ? false : { opacity: 0, y: 20 }}
+            initial={reduce ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="grid grid-cols-3 gap-2"
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="grid grid-cols-3 gap-1.5"
           >
-            <StatCard label="最低" value={bpmRange.min} />
-            <StatCard label="平均" value={bpmRange.avg} highlight />
-            <StatCard label="最高" value={bpmRange.max} />
+            <StatCard label="MIN" value={bpmRange.min} />
+            <StatCard label="AVG" value={bpmRange.avg} highlight />
+            <StatCard label="MAX" value={bpmRange.max} />
           </motion.div>
         )}
 
         {/* 心率曲线 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 20 }}
+          initial={reduce ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/30"
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="p-3.5 rounded-xl bg-zinc-900/50 border border-zinc-800/40"
         >
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-medium text-zinc-300">心率曲线</h2>
-            <span className="text-[10px] text-zinc-600 tabular-nums">
-              {history.length > 0 ? `${history.length} 个数据点` : "暂无数据"}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] text-zinc-500 font-mono">HEART RATE</span>
+            <span className="text-[10px] text-zinc-600 font-mono tabular-nums">
+              {history.length > 0 ? `${history.length} PTS` : "NO DATA"}
             </span>
           </div>
           <HeartRateChart data={history} />
@@ -139,16 +136,16 @@ export default function ViewerPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-center"
+          transition={{ delay: 0.3 }}
+          className="text-center pt-1"
         >
           <a
             href="/host"
-            className="inline-flex items-center gap-1.5 text-[11px] text-zinc-600 active:text-zinc-400
-                       py-2 px-4 rounded-full bg-zinc-900/50 transition-colors"
+            className="inline-flex items-center gap-1 text-[10px] text-zinc-600 font-mono
+                       py-1.5 px-3 rounded-lg bg-zinc-900/30 active:bg-zinc-800/50 transition-colors"
           >
-            <span>作为主播连接手环</span>
-            <ArrowRight size={10} weight="bold" />
+            <span>CONNECT AS HOST</span>
+            <ArrowRight size={9} weight="bold" />
           </a>
         </motion.div>
       </div>
@@ -158,18 +155,17 @@ export default function ViewerPage() {
 
 function StatCard({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
   return (
-    <div className={`py-3 px-2 rounded-xl text-center ${
+    <div className={`py-2 px-2 rounded-lg text-center ${
       highlight
-        ? "bg-rose-500/10 border border-rose-500/20"
-        : "bg-zinc-900/50 border border-zinc-800/30"
+        ? "bg-rose-500/8 border border-rose-500/15"
+        : "bg-zinc-900/40 border border-zinc-800/30"
     }`}>
-      <div className="text-[10px] text-zinc-500 mb-1">{label}</div>
-      <div className={`font-mono text-xl font-bold tabular-nums ${
-        highlight ? "text-rose-400" : "text-zinc-200"
+      <div className="text-[9px] text-zinc-600 font-mono mb-0.5">{label}</div>
+      <div className={`font-mono text-base font-bold tabular-nums ${
+        highlight ? "text-rose-400" : "text-zinc-300"
       }`}>
         {value}
       </div>
-      <div className="text-[10px] text-zinc-600 mt-0.5">BPM</div>
     </div>
   );
 }
