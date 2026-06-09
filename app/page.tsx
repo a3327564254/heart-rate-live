@@ -55,22 +55,22 @@ export default function ViewerPage() {
   const isLive = wsStatus === "connected" && hostConnected;
 
   return (
-    <main className="min-h-dvh bg-zinc-950 text-white flex flex-col items-center justify-center p-4">
+    <main className="min-h-[100dvh] bg-zinc-950 text-white flex flex-col items-center justify-between px-4 py-6 safe-area">
       {/* 背景 */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-500/5 via-zinc-950 to-zinc-950 pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col items-center gap-5 w-full max-w-md">
+      <div className="relative z-10 flex flex-col items-center gap-4 w-full max-w-md flex-1 justify-center">
         {/* 顶部状态 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: -12 }}
+          initial={reduce ? false : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="w-full flex items-center justify-between"
+          transition={{ duration: 0.3 }}
+          className="w-full flex items-center justify-between px-1"
         >
           <ConnectionStatus status={wsStatus} label="服务器" />
           <div className="flex items-center gap-1.5 text-zinc-500">
-            <Users size={13} weight="light" />
-            <span className="text-xs">{viewerCount}</span>
+            <Users size={14} weight="light" />
+            <span className="text-xs tabular-nums">{viewerCount}</span>
           </div>
         </motion.div>
 
@@ -78,7 +78,8 @@ export default function ViewerPage() {
         <motion.div
           initial={reduce ? false : { opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+          className="my-2"
         >
           <HeartRateDisplay bpm={bpm} isLive={isLive} />
         </motion.div>
@@ -103,9 +104,9 @@ export default function ViewerPage() {
         {/* 统计 */}
         {bpmRange && (
           <motion.div
-            initial={reduce ? false : { opacity: 0, y: 12 }}
+            initial={reduce ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
             className="w-full grid grid-cols-3 gap-2"
           >
             <StatCard label="最低" value={bpmRange.min} />
@@ -116,42 +117,46 @@ export default function ViewerPage() {
 
         {/* 图表 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 12 }}
+          initial={reduce ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="w-full p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/40"
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="w-full p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/40"
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 px-1">
             <h2 className="text-xs text-zinc-400">心率曲线</h2>
-            <span className="text-[10px] text-zinc-600">
+            <span className="text-[10px] text-zinc-600 tabular-nums">
               {history.length} 点
             </span>
           </div>
           <HeartRateChart data={history} />
         </motion.div>
+      </div>
 
-        {/* 主机入口 */}
-        <motion.a
+      {/* 底部链接 - 固定在底部 */}
+      <motion.div
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="relative z-10 py-2"
+      >
+        <a
           href="/host"
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="flex items-center gap-1 text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors"
+          className="flex items-center gap-1.5 text-[11px] text-zinc-600 active:text-zinc-400 transition-colors py-2 px-3"
         >
           <span>作为主机连接手环</span>
           <ArrowRight size={11} weight="light" />
-        </motion.a>
-      </div>
+        </a>
+      </motion.div>
     </main>
   );
 }
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="py-3 px-2 rounded-xl bg-zinc-900/40 border border-zinc-800/40 text-center">
-      <div className="text-[10px] text-zinc-600 mb-1">{label}</div>
-      <div className="font-mono text-xl font-bold text-zinc-200">{value}</div>
-      <div className="text-[10px] text-zinc-600 mt-0.5">BPM</div>
+    <div className="py-2.5 px-2 rounded-xl bg-zinc-900/40 border border-zinc-800/40 text-center">
+      <div className="text-[10px] text-zinc-600 mb-0.5">{label}</div>
+      <div className="font-mono text-lg font-bold text-zinc-200 tabular-nums">{value}</div>
+      <div className="text-[10px] text-zinc-600">BPM</div>
     </div>
   );
 }

@@ -77,16 +77,16 @@ export default function HostPage() {
   }, []);
 
   return (
-    <main className="min-h-dvh bg-zinc-950 text-white flex flex-col items-center justify-center p-4">
+    <main className="min-h-[100dvh] bg-zinc-950 text-white flex flex-col items-center justify-center px-4 py-6 safe-area">
       {/* 背景 */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-500/5 via-zinc-950 to-zinc-950 pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-md">
+      <div className="relative z-10 flex flex-col items-center gap-5 w-full max-w-md flex-1 justify-center">
         {/* 标题 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: -12 }}
+          initial={reduce ? false : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.3 }}
           className="text-center"
         >
           <h1 className="text-lg font-medium tracking-tight">主机模式</h1>
@@ -97,7 +97,7 @@ export default function HostPage() {
         <motion.div
           initial={reduce ? false : { opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
         >
           <HeartRateDisplay bpm={bpm} isLive={bleStatus === "connected"} />
         </motion.div>
@@ -105,21 +105,21 @@ export default function HostPage() {
         {/* 错误 */}
         {error && (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             className="w-full max-w-sm p-3 rounded-xl bg-red-500/10 border border-red-500/20
                        flex items-start gap-2"
           >
             <Warning size={14} className="text-red-400 mt-0.5 shrink-0" weight="light" />
-            <span className="text-xs text-red-400">{error}</span>
+            <span className="text-xs text-red-400 leading-relaxed">{error}</span>
           </motion.div>
         )}
 
         {/* 控制 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 12 }}
+          initial={reduce ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
         >
           <HostControls
             bleStatus={bleStatus}
