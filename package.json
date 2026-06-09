@@ -7,7 +7,7 @@
     "dev:server": "tsx server/index.ts",
     "dev:all": "concurrently \"npm run dev:server\" \"npm run dev\"",
     "build": "next build",
-    "start": "next start",
+    "start": "tsx server/index.ts",
     "start:server": "tsx server/index.ts",
     "lint": "eslint"
   },

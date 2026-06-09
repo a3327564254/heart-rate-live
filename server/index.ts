@@ -42,7 +42,8 @@ function broadcastHostStatus(roomId: string, connected: boolean): void {
   });
 }
 
-const wss = new WebSocketServer({ port: 8080 });
+const PORT = parseInt(process.env.PORT || "8080", 10);
+const wss = new WebSocketServer({ port: PORT });
 
 wss.on("connection", (ws: WebSocket) => {
   let currentRoomId: string | null = null;
@@ -128,4 +129,4 @@ wss.on("connection", (ws: WebSocket) => {
   });
 });
 
-console.log("WebSocket server running on ws://localhost:8080");
+console.log(`WebSocket server running on port ${PORT}`);
