@@ -96,7 +96,8 @@ export class HeartRateWSClient {
     };
 
     this.ws.onerror = () => {
-      this.handlers.onError?.("连接失败");
+      // WebSocket 错误静默处理，不触发 onError 回调
+      // 连接状态会通过 onclose 事件更新
     };
   }
 

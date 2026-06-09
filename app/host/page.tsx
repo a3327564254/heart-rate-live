@@ -30,7 +30,10 @@ export default function HostPage() {
       onConnect: () => setWsStatus("connected"),
       onDisconnect: () => setWsStatus("disconnected"),
       onViewerCount: setViewerCount,
-      onError: (msg) => setError(msg),
+      onError: () => {
+        // WebSocket 错误不显示为阻断性错误，只更新状态
+        setWsStatus("disconnected");
+      },
     });
 
     return () => wsClient.disconnect();
@@ -62,9 +65,14 @@ export default function HostPage() {
       );
       bleConnectionRef.current = connection;
       setBleStatus("connected");
+      setError(null); // 连接成功，清除错误
     } catch (err) {
       setBleStatus("disconnected");
-      setError(err instanceof Error ? err.message : "连接失败");
+      const msg = err instanceof Error ? err.message : "蓝牙连接失败";
+      // 过滤掉用户取消选择的提示
+      if (msg !== "User cancelled the requestDevice() chooser.") {
+        setError(msg);
+      }
     }
   }, []);
 
