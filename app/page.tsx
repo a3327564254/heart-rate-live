@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { Users, Pulse, ArrowRight } from "@phosphor-icons/react";
+import { Users, Pulse, ArrowRight, WifiHigh, WifiSlash } from "@phosphor-icons/react";
 import { HeartRateDisplay } from "@/components/HeartRateDisplay";
 import { HeartRateChart } from "@/components/HeartRateChart";
-import { ConnectionStatus } from "@/components/ConnectionStatus";
 import { HeartRateWSClient } from "@/lib/websocket";
 import type { HeartRatePoint } from "@/lib/types";
 
@@ -55,108 +54,122 @@ export default function ViewerPage() {
   const isLive = wsStatus === "connected" && hostConnected;
 
   return (
-    <main className="min-h-[100dvh] bg-zinc-950 text-white flex flex-col items-center justify-between px-4 py-6 safe-area">
-      {/* 背景 */}
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-500/5 via-zinc-950 to-zinc-950 pointer-events-none" />
+    <main className="min-h-[100dvh] bg-[#08080a] text-white flex flex-col safe-area">
+      {/* 顶部栏 */}
+      <header className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-2">
+          {wsStatus === "connected" ? (
+            <WifiHigh size={14} weight="fill" className="text-emerald-500" />
+          ) : (
+            <WifiSlash size={14} weight="fill" className="text-zinc-600" />
+          )}
+          <span className="text-[11px] text-zinc-500">
+            {wsStatus === "connected" ? (isLive ? "直播中" : "已连接") : "连接中..."}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900/80">
+          <Users size={12} weight="light" className="text-zinc-400" />
+          <span className="text-[11px] text-zinc-400 tabular-nums">{viewerCount}</span>
+        </div>
+      </header>
 
-      <div className="relative z-10 flex flex-col items-center gap-4 w-full max-w-md flex-1 justify-center">
-        {/* 顶部状态 */}
-        <motion.div
-          initial={reduce ? false : { opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="w-full flex items-center justify-between px-1"
-        >
-          <ConnectionStatus status={wsStatus} label="服务器" />
-          <div className="flex items-center gap-1.5 text-zinc-500">
-            <Users size={14} weight="light" />
-            <span className="text-xs tabular-nums">{viewerCount}</span>
-          </div>
-        </motion.div>
-
+      {/* 主内容 */}
+      <div className="flex-1 flex flex-col items-center justify-center px-5 -mt-8">
         {/* 心率显示 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, scale: 0.95 }}
+          initial={reduce ? false : { opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-          className="my-2"
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
           <HeartRateDisplay bpm={bpm} isLive={isLive} />
         </motion.div>
 
-        {/* 等待状态 */}
+        {/* 等待提示 */}
         {!hostConnected && wsStatus === "connected" && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center gap-2 text-xs text-amber-500/70"
+            transition={{ delay: 0.3 }}
+            className="mt-6 flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20"
           >
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             >
-              <Pulse size={14} weight="light" />
+              <Pulse size={14} weight="bold" className="text-amber-500" />
             </motion.div>
-            <span>等待主机连接</span>
+            <span className="text-xs text-amber-500">等待主播连接手环</span>
           </motion.div>
         )}
+      </div>
 
-        {/* 统计 */}
+      {/* 底部信息区 */}
+      <div className="px-5 pb-6 space-y-4">
+        {/* 统计卡片 */}
         {bpmRange && (
           <motion.div
-            initial={reduce ? false : { opacity: 0, y: 8 }}
+            initial={reduce ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className="w-full grid grid-cols-3 gap-2"
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="grid grid-cols-3 gap-2"
           >
             <StatCard label="最低" value={bpmRange.min} />
-            <StatCard label="平均" value={bpmRange.avg} />
+            <StatCard label="平均" value={bpmRange.avg} highlight />
             <StatCard label="最高" value={bpmRange.max} />
           </motion.div>
         )}
 
-        {/* 图表 */}
+        {/* 心率曲线 */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 8 }}
+          initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.15 }}
-          className="w-full p-3 rounded-2xl bg-zinc-900/40 border border-zinc-800/40"
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800/30"
         >
-          <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xs text-zinc-400">心率曲线</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-medium text-zinc-300">心率曲线</h2>
             <span className="text-[10px] text-zinc-600 tabular-nums">
-              {history.length} 点
+              {history.length > 0 ? `${history.length} 个数据点` : "暂无数据"}
             </span>
           </div>
           <HeartRateChart data={history} />
         </motion.div>
-      </div>
 
-      {/* 底部链接 - 固定在底部 */}
-      <motion.div
-        initial={reduce ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="relative z-10 py-2"
-      >
-        <a
-          href="/host"
-          className="flex items-center gap-1.5 text-[11px] text-zinc-600 active:text-zinc-400 transition-colors py-2 px-3"
+        {/* 主机入口 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="text-center"
         >
-          <span>作为主机连接手环</span>
-          <ArrowRight size={11} weight="light" />
-        </a>
-      </motion.div>
+          <a
+            href="/host"
+            className="inline-flex items-center gap-1.5 text-[11px] text-zinc-600 active:text-zinc-400
+                       py-2 px-4 rounded-full bg-zinc-900/50 transition-colors"
+          >
+            <span>作为主播连接手环</span>
+            <ArrowRight size={10} weight="bold" />
+          </a>
+        </motion.div>
+      </div>
     </main>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
   return (
-    <div className="py-2.5 px-2 rounded-xl bg-zinc-900/40 border border-zinc-800/40 text-center">
-      <div className="text-[10px] text-zinc-600 mb-0.5">{label}</div>
-      <div className="font-mono text-lg font-bold text-zinc-200 tabular-nums">{value}</div>
-      <div className="text-[10px] text-zinc-600">BPM</div>
+    <div className={`py-3 px-2 rounded-xl text-center ${
+      highlight
+        ? "bg-rose-500/10 border border-rose-500/20"
+        : "bg-zinc-900/50 border border-zinc-800/30"
+    }`}>
+      <div className="text-[10px] text-zinc-500 mb-1">{label}</div>
+      <div className={`font-mono text-xl font-bold tabular-nums ${
+        highlight ? "text-rose-400" : "text-zinc-200"
+      }`}>
+        {value}
+      </div>
+      <div className="text-[10px] text-zinc-600 mt-0.5">BPM</div>
     </div>
   );
 }

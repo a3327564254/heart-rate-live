@@ -35,43 +35,43 @@ export function HeartRateChart({ data, maxPoints = 60 }: HeartRateChartProps) {
     if (chartData.length === 0) return { minBpm: 40, maxBpm: 200 };
     const bpms = chartData.map((d) => d.bpm);
     return {
-      minBpm: Math.max(40, Math.min(...bpms) - 15),
-      maxBpm: Math.min(220, Math.max(...bpms) + 15),
+      minBpm: Math.max(40, Math.min(...bpms) - 20),
+      maxBpm: Math.min(220, Math.max(...bpms) + 20),
     };
   }, [chartData]);
 
   if (chartData.length === 0) {
     return (
-      <div className="w-full h-40 flex flex-col items-center justify-center gap-2 text-zinc-600">
-        <Pulse size={20} weight="light" />
-        <span className="text-xs">等待数据</span>
+      <div className="w-full h-32 flex flex-col items-center justify-center gap-2">
+        <Pulse size={20} weight="light" className="text-zinc-700" />
+        <span className="text-[11px] text-zinc-600">等待数据</span>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-44">
+    <div className="w-full h-36">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData}>
+        <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="hrGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+              <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="time"
-            tick={{ fill: "#52525b", fontSize: 10 }}
+            tick={{ fill: "#3f3f46", fontSize: 9 }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             domain={[minBpm, maxBpm]}
-            tick={{ fill: "#52525b", fontSize: 10 }}
+            tick={{ fill: "#3f3f46", fontSize: 9 }}
             axisLine={false}
             tickLine={false}
-            width={32}
+            width={30}
           />
           <Tooltip
             contentStyle={{
@@ -80,7 +80,8 @@ export function HeartRateChart({ data, maxPoints = 60 }: HeartRateChartProps) {
               borderRadius: "12px",
               color: "#fff",
               fontSize: "11px",
-              padding: "8px 12px",
+              padding: "6px 10px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
             }}
             labelStyle={{ color: "#71717a", fontSize: "10px" }}
             formatter={(value) => [`${value} BPM`]}
@@ -89,7 +90,7 @@ export function HeartRateChart({ data, maxPoints = 60 }: HeartRateChartProps) {
             type="monotone"
             dataKey="bpm"
             stroke="#f43f5e"
-            strokeWidth={1.5}
+            strokeWidth={2}
             fill="url(#hrGradient)"
             dot={false}
             activeDot={{ r: 3, fill: "#f43f5e", strokeWidth: 0 }}
