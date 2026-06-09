@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Bluetooth, BluetoothSlash, Broadcast, Users, Warning, ArrowLeft } from "@phosphor-icons/react";
 import { HeartRateDisplay } from "@/components/HeartRateDisplay";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { connectToHeartRateDevice, isWebBluetoothAvailable } from "@/lib/bluetooth";
 import { HeartRateWSClient } from "@/lib/websocket";
 import type { HeartRatePoint } from "@/lib/types";
@@ -39,7 +40,7 @@ export default function HostPage() {
     setError(null);
 
     if (!isWebBluetoothAvailable()) {
-      setError("浏览器不支持 Web Bluetooth，请使用 Chrome");
+      setError("此浏览器不支持 Web Bluetooth，请使用 Chrome");
       return;
     }
 
@@ -78,26 +79,32 @@ export default function HostPage() {
   const isConnected = bleStatus === "connected";
 
   return (
-    <main className="min-h-[100dvh] bg-zinc-950 text-zinc-100 flex flex-col safe-area">
+    <main className="min-h-[100dvh] flex flex-col safe-area"
+      style={{ background: "var(--bg-primary)", color: "var(--text-primary)" }}>
       {/* 顶部栏 */}
       <header className="flex items-center justify-between px-5 py-3.5">
-        <a href="/" className="flex items-center gap-1 text-zinc-500 active:text-zinc-300 transition-colors">
+        <a href="/" className="flex items-center gap-1 transition-colors"
+          style={{ color: "var(--text-tertiary)" }}>
           <ArrowLeft size={14} weight="bold" />
-          <span className="text-[11px] font-mono">BACK</span>
+          <span className="text-[11px] font-mono">返回</span>
         </a>
         <div className="flex items-center gap-2">
-          <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${
-            isConnected ? "bg-rose-500/10" : "bg-zinc-900/50"
-          }`}>
-            <Broadcast size={11} weight="fill" className={isConnected ? "text-rose-500" : "text-zinc-600"} />
-            <span className={`text-[10px] font-mono ${isConnected ? "text-rose-400" : "text-zinc-600"}`}>
-              {isConnected ? "ON AIR" : "OFF"}
+          <div className="flex items-center gap-1 px-2 py-1 rounded-md"
+            style={{ background: isConnected ? "var(--accent-bg)" : "var(--bg-secondary)" }}>
+            <Broadcast size={11} weight="fill" style={{ color: isConnected ? "var(--accent)" : "var(--text-tertiary)" }} />
+            <span className="text-[10px] font-mono"
+              style={{ color: isConnected ? "var(--accent)" : "var(--text-tertiary)" }}>
+              {isConnected ? "广播中" : "未广播"}
             </span>
           </div>
-          <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-zinc-900/50">
-            <Users size={11} weight="light" className="text-zinc-600" />
-            <span className="text-[10px] text-zinc-500 font-mono tabular-nums">{viewerCount}</span>
+          <div className="flex items-center gap-1 px-2 py-1 rounded-md"
+            style={{ background: "var(--bg-secondary)" }}>
+            <Users size={11} weight="light" style={{ color: "var(--text-tertiary)" }} />
+            <span className="text-[10px] font-mono tabular-nums" style={{ color: "var(--text-tertiary)" }}>
+              {viewerCount} 人
+            </span>
           </div>
+          <ThemeToggle />
         </div>
       </header>
 
@@ -105,13 +112,10 @@ export default function HostPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-5 -mt-4">
         {/* 蓝牙状态 */}
         <div className="mb-3 flex items-center gap-1.5">
-          <Bluetooth size={13} weight="bold" className={
-            bleStatus === "connected" ? "text-blue-400" :
-            bleStatus === "connecting" ? "text-amber-400" : "text-zinc-600"
-          } />
-          <span className="text-[10px] text-zinc-500 font-mono">
-            {bleStatus === "connected" ? "BAND CONNECTED" :
-             bleStatus === "connecting" ? "CONNECTING..." : "BAND DISCONNECTED"}
+          <Bluetooth size={13} weight="bold"
+            style={{ color: bleStatus === "connected" ? "#3b82f6" : bleStatus === "connecting" ? "#f59e0b" : "var(--text-tertiary)" }} />
+          <span className="text-[10px] font-mono" style={{ color: "var(--text-tertiary)" }}>
+            {bleStatus === "connected" ? "手环已连接" : bleStatus === "connecting" ? "连接中..." : "手环未连接"}
           </span>
         </div>
 
@@ -129,11 +133,11 @@ export default function HostPage() {
           <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 w-full max-w-xs p-2.5 rounded-lg bg-red-500/8 border border-red-500/15
-                       flex items-start gap-1.5"
+            className="mt-4 w-full max-w-xs p-2.5 rounded-lg flex items-start gap-1.5"
+            style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)" }}
           >
-            <Warning size={12} className="text-red-400 mt-0.5 shrink-0" weight="bold" />
-            <span className="text-[11px] text-red-400 font-mono">{error}</span>
+            <Warning size={12} className="text-red-500 mt-0.5 shrink-0" weight="bold" />
+            <span className="text-[11px] text-red-500 font-mono">{error}</span>
           </motion.div>
         )}
 
@@ -148,22 +152,24 @@ export default function HostPage() {
             <button
               onClick={handleConnect}
               disabled={bleStatus === "connecting"}
-              className="w-full py-3.5 rounded-xl bg-blue-600 text-white font-mono text-xs font-medium
-                         active:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed
-                         transition-colors duration-100 flex items-center justify-center gap-1.5"
+              className="w-full py-3.5 rounded-xl text-white font-mono text-xs font-medium
+                         active:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed
+                         transition-opacity duration-100 flex items-center justify-center gap-1.5"
+              style={{ background: "#2563eb" }}
             >
               <Bluetooth size={14} weight="bold" />
-              {bleStatus === "connecting" ? "CONNECTING..." : "CONNECT BAND"}
+              {bleStatus === "connecting" ? "连接中..." : "连接手环"}
             </button>
           ) : (
             <button
               onClick={handleDisconnect}
-              className="w-full py-3.5 rounded-xl bg-zinc-800 text-zinc-300 font-mono text-xs font-medium
-                         active:bg-zinc-700 transition-colors duration-100
+              className="w-full py-3.5 rounded-xl font-mono text-xs font-medium
+                         active:opacity-80 transition-opacity duration-100
                          flex items-center justify-center gap-1.5"
+              style={{ background: "var(--bg-tertiary)", color: "var(--text-secondary)" }}
             >
               <BluetoothSlash size={14} weight="bold" />
-              DISCONNECT
+              断开连接
             </button>
           )}
         </motion.div>
@@ -171,13 +177,16 @@ export default function HostPage() {
 
       {/* 底部说明 */}
       <div className="px-5 pb-5">
-        <div className="p-3 rounded-xl bg-zinc-900/30 border border-zinc-800/30">
-          <div className="text-[10px] text-zinc-500 font-mono mb-2">HOW TO USE</div>
-          <div className="space-y-1">
+        <div className="p-3 rounded-xl"
+          style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)" }}>
+          <div className="text-[10px] font-mono mb-2" style={{ color: "var(--text-tertiary)" }}>使用说明</div>
+          <div className="space-y-1.5">
             {["开启手环心率广播", "点击上方按钮连接", "连接成功自动广播", "分享页面给观众"].map((step, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="text-[10px] text-zinc-600 font-mono tabular-nums">{String(i + 1).padStart(2, "0")}</span>
-                <span className="text-[11px] text-zinc-500">{step}</span>
+                <span className="text-[10px] font-mono tabular-nums" style={{ color: "var(--text-tertiary)" }}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{step}</span>
               </div>
             ))}
           </div>

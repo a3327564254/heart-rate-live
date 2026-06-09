@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Users, Pulse, ArrowRight, WifiHigh, WifiSlash } from "@phosphor-icons/react";
 import { HeartRateDisplay } from "@/components/HeartRateDisplay";
 import { HeartRateChart } from "@/components/HeartRateChart";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { HeartRateWSClient } from "@/lib/websocket";
 import type { HeartRatePoint } from "@/lib/types";
 
@@ -52,26 +53,32 @@ export default function ViewerPage() {
   const isLive = wsStatus === "connected" && hostConnected;
 
   return (
-    <main className="min-h-[100dvh] bg-zinc-950 text-zinc-100 flex flex-col safe-area">
-      {/* 顶部状态栏 - 单行 */}
+    <main className="min-h-[100dvh] flex flex-col safe-area"
+      style={{ background: "var(--bg-primary)", color: "var(--text-primary)" }}>
+      {/* 顶部栏 */}
       <header className="flex items-center justify-between px-5 py-3.5">
         <div className="flex items-center gap-1.5">
           {wsStatus === "connected" ? (
             <WifiHigh size={13} weight="fill" className="text-emerald-500" />
           ) : (
-            <WifiSlash size={13} weight="fill" className="text-zinc-600" />
+            <WifiSlash size={13} weight="fill" style={{ color: "var(--text-tertiary)" }} />
           )}
-          <span className="text-[11px] text-zinc-500 font-mono">
-            {isLive ? "LIVE" : wsStatus === "connected" ? "CONNECTED" : "CONNECTING"}
+          <span className="text-[11px] font-mono" style={{ color: "var(--text-tertiary)" }}>
+            {isLive ? "直播中" : wsStatus === "connected" ? "已连接" : "连接中..."}
           </span>
         </div>
-        <div className="flex items-center gap-1">
-          <Users size={12} weight="light" className="text-zinc-600" />
-          <span className="text-[11px] text-zinc-500 font-mono tabular-nums">{viewerCount}</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Users size={12} weight="light" style={{ color: "var(--text-tertiary)" }} />
+            <span className="text-[11px] font-mono tabular-nums" style={{ color: "var(--text-tertiary)" }}>
+              {viewerCount} 人
+            </span>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 
-      {/* 主内容区 - 垂直居中 */}
+      {/* 主内容 */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 -mt-4">
         <motion.div
           initial={reduce ? false : { opacity: 0, scale: 0.95 }}
@@ -81,7 +88,7 @@ export default function ViewerPage() {
           <HeartRateDisplay bpm={bpm} isLive={isLive} />
         </motion.div>
 
-        {/* 等待状态 - 简洁提示 */}
+        {/* 等待状态 */}
         {!hostConnected && wsStatus === "connected" && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -95,14 +102,14 @@ export default function ViewerPage() {
             >
               <Pulse size={12} weight="bold" className="text-amber-500" />
             </motion.div>
-            <span className="text-[11px] text-amber-500/70 font-mono">WAITING FOR HOST</span>
+            <span className="text-[11px] text-amber-500/70 font-mono">等待主播连接</span>
           </motion.div>
         )}
       </div>
 
       {/* 底部数据区 */}
       <div className="px-5 pb-5 space-y-3">
-        {/* 统计卡片 - 3列网格 */}
+        {/* 统计卡片 */}
         {bpmRange && (
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 10 }}
@@ -110,9 +117,9 @@ export default function ViewerPage() {
             transition={{ duration: 0.3, delay: 0.1 }}
             className="grid grid-cols-3 gap-1.5"
           >
-            <StatCard label="MIN" value={bpmRange.min} />
-            <StatCard label="AVG" value={bpmRange.avg} highlight />
-            <StatCard label="MAX" value={bpmRange.max} />
+            <StatCard label="最低" value={bpmRange.min} />
+            <StatCard label="平均" value={bpmRange.avg} highlight />
+            <StatCard label="最高" value={bpmRange.max} />
           </motion.div>
         )}
 
@@ -121,12 +128,13 @@ export default function ViewerPage() {
           initial={reduce ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}
-          className="p-3.5 rounded-xl bg-zinc-900/50 border border-zinc-800/40"
+          className="p-3.5 rounded-xl"
+          style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)" }}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] text-zinc-500 font-mono">HEART RATE</span>
-            <span className="text-[10px] text-zinc-600 font-mono tabular-nums">
-              {history.length > 0 ? `${history.length} PTS` : "NO DATA"}
+            <span className="text-[10px] font-mono" style={{ color: "var(--text-tertiary)" }}>心率曲线</span>
+            <span className="text-[10px] font-mono tabular-nums" style={{ color: "var(--text-tertiary)" }}>
+              {history.length > 0 ? `${history.length} 个数据点` : "暂无数据"}
             </span>
           </div>
           <HeartRateChart data={history} />
@@ -141,11 +149,11 @@ export default function ViewerPage() {
         >
           <a
             href="/host"
-            className="inline-flex items-center gap-1 text-[10px] text-zinc-600 font-mono
-                       py-1.5 px-3 rounded-lg bg-zinc-900/30 active:bg-zinc-800/50 transition-colors"
+            className="inline-flex items-center gap-1 text-[11px] font-mono py-2 px-3 rounded-lg transition-colors"
+            style={{ color: "var(--text-tertiary)", background: "var(--bg-secondary)" }}
           >
-            <span>CONNECT AS HOST</span>
-            <ArrowRight size={9} weight="bold" />
+            <span>作为主播连接手环</span>
+            <ArrowRight size={10} weight="bold" />
           </a>
         </motion.div>
       </div>
@@ -155,17 +163,21 @@ export default function ViewerPage() {
 
 function StatCard({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
   return (
-    <div className={`py-2 px-2 rounded-lg text-center ${
-      highlight
-        ? "bg-rose-500/8 border border-rose-500/15"
-        : "bg-zinc-900/40 border border-zinc-800/30"
-    }`}>
-      <div className="text-[9px] text-zinc-600 font-mono mb-0.5">{label}</div>
-      <div className={`font-mono text-base font-bold tabular-nums ${
-        highlight ? "text-rose-400" : "text-zinc-300"
-      }`}>
+    <div
+      className="py-2.5 px-2 rounded-lg text-center"
+      style={{
+        background: highlight ? "var(--accent-bg)" : "var(--bg-secondary)",
+        border: `1px solid ${highlight ? "var(--accent-border)" : "var(--border)"}`,
+      }}
+    >
+      <div className="text-[10px] font-mono mb-0.5" style={{ color: "var(--text-tertiary)" }}>{label}</div>
+      <div
+        className="font-mono text-lg font-bold tabular-nums"
+        style={{ color: highlight ? "var(--accent)" : "var(--text-primary)" }}
+      >
         {value}
       </div>
+      <div className="text-[10px] font-mono" style={{ color: "var(--text-tertiary)" }}>BPM</div>
     </div>
   );
 }
